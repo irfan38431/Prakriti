@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Title from "./Title";
 import axios from "axios";
 import RecordMessage from "./RecordMessage";
@@ -9,18 +9,23 @@ const Controller = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [textMessage, setTextMessage] = useState("");
 
-  function createBlobURL(data: any) {
+  // Function to handle receiving a message from the chatbot
+  const receiveMessage = (message: string) => {
+    const botMessage = { sender: "prakriti", textMessage: message };
+    setMessages((prevMessages) => [...prevMessages, botMessage]);
+  };
+
+  const createBlobURL = (data: any) => {
     const blob = new Blob([data], { type: "audio/mpeg" });
-    const url = window.URL.createObjectURL(blob);
-    return url;
-  }
+    return window.URL.createObjectURL(blob);
+  };
 
   const handleStop = async (blobUrl: string) => {
     setIsLoading(true);
 
     // Append recorded message to messages
     const myMessage = { sender: "me", blobUrl };
-    const messagesArr = [...messages, myMessage];
+    setMessages((prevMessages) => [...prevMessages, myMessage]);
 
     // convert blob url to blob object
     fetch(blobUrl)
@@ -45,8 +50,7 @@ const Controller = () => {
 
             // Append to audio
             const praMessage = { sender: "prakriti", blobUrl: audio.src };
-            messagesArr.push(praMessage);
-            setMessages(messagesArr);
+            setMessages((prevMessages) => [...prevMessages, praMessage]);
 
             // Play audio
             setIsLoading(false);
@@ -59,20 +63,37 @@ const Controller = () => {
       });
   };
 
-  const handleTextMessageSend = () => {
+  const handleTextMessageSend = async () => {
     if (textMessage.trim() === "") {
       // Don't send empty messages
       return;
     }
 
     const myMessage = { sender: "me", textMessage };
-    const messagesArr = [...messages, myMessage];
-    setMessages(messagesArr);
+    setMessages((prevMessages) => [...prevMessages, myMessage]);
 
     // Clear the input field
     setTextMessage("");
 
-    // add an API call here to send the text message to a server if needed.
+    try {
+      // Send the text message to the backend API
+      const response = await axios.post("http://localhost:8000/send-text-message", {
+        textMessage: textMessage,
+      });
+
+      // Handle the response from the backend if needed
+      // For example, you can update the UI based on the chatbot's reply.
+      const chatbotReply = response.data;
+
+      if (chatbotReply) {
+        // Display the chatbot's reply in the frontend
+        receiveMessage(chatbotReply);
+
+        // You can add additional logic here to handle the chatbot's reply if needed
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -80,6 +101,10 @@ const Controller = () => {
       handleTextMessageSend();
     }
   };
+
+  useEffect(() => {
+    // You can use this useEffect to initialize your conversation or fetch previous messages
+  }, []);
 
   return (
     <div className="h-screen overflow-y-hidden bg-green-100">
