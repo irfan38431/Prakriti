@@ -81,7 +81,7 @@ async def post_audio(file: UploadFile = File(...)):
     # Get chat response
     chat_response = get_chat_response(message_decoded)
     if chat_response:
-        print("response milgaya,check further")
+        print("response milgaya,Aage bado bhai")
     # Store messages
     store_messages(message_decoded, chat_response)
 

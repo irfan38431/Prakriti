@@ -2,23 +2,18 @@ import { useState } from "react";
 import Title from "./Title";
 import axios from "axios";
 import RecordMessage from "./RecordMessage";
-//import Chatbox from "./Chatbox";
+import ChatBubble from "./ChatBubble";
 
 const Controller = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
-  //const [text, settext]=useState<any[]>([]);
+  const [textMessage, setTextMessage] = useState("");
 
   function createBlobURL(data: any) {
     const blob = new Blob([data], { type: "audio/mpeg" });
     const url = window.URL.createObjectURL(blob);
     return url;
   }
-  // function createBlobURLT(data: any) {
-  //   const blob = new Blob([data], { type: "plain/text" });
-  //   const url = window.URL.createObjectURL(blob);
-  //   return url;
-  // }
 
   const handleStop = async (blobUrl: string) => {
     setIsLoading(true);
@@ -63,42 +58,29 @@ const Controller = () => {
           });
       });
   };
-  // const handleStopT = async (textMessage: string) => {
-  //   setIsLoading(true);
-  
-  //   // Append recorded message to messages
-  //   const myMessage = { sender: "me", textMessage }; // Use textMessage instead of blobUrl
-  //   const messagesArr = [...messages, myMessage];
-  
-  //   // Convert text message to a Blob object
-  //   const blob = new Blob([textMessage], { type: "text/plain" });
-  
-  //   // Construct FormData with the Blob
-  //   const formData = new FormData();
-  //   formData.append("file", blob, "myFile.txt"); // Use a .txt extension for text files
-  
-  //   // Send form data to the API endpoint
-  //   try {
-  //     const response = await axios.post("http://localhost:8000/post-text", formData, {
-  //       headers: {
-  //         "Content-Type": "text/plain", // Set the Content-Type for text
-  //       },
-  //     });
-  
-  //     // Append the received text message to messages
-  //     const receivedTextMessage = response.data;
-  //     const praMessage = { sender: "prakriti", textMessage: receivedTextMessage };
-  //     messagesArr.push(praMessage);
-  //     setMessages(messagesArr);
-  
-  //     // Clear loading state
-  //     setIsLoading(false);
-  //   } catch (err) {
-  //     console.error(err);
-  //     setIsLoading(false);
-  //   }
-  // };
-  
+
+  const handleTextMessageSend = () => {
+    if (textMessage.trim() === "") {
+      // Don't send empty messages
+      return;
+    }
+
+    const myMessage = { sender: "me", textMessage };
+    const messagesArr = [...messages, myMessage];
+    setMessages(messagesArr);
+
+    // Clear the input field
+    setTextMessage("");
+
+    // add an API call here to send the text message to a server if needed.
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleTextMessageSend();
+    }
+  };
+
   return (
     <div className="h-screen overflow-y-hidden bg-green-100">
       {/* Title */}
@@ -107,39 +89,37 @@ const Controller = () => {
       <div className="flex flex-col justify-between h-full overflow-y-scroll pb-96 border-t-green-700">
         {/* Conversation */}
         <div className="mt-5 px-5">
-          {messages?.map((audio, index) => {
-            return (
-              <div
-                key={index + audio.sender}
-                className={
-                  "flex flex-col " +
-                  (audio.sender == "prakriti" && "flex items-end")
-                }
-              >
-                {/* Sender */}
-                <div className="mt-4 ">
-                  <p
-                    className={
-                      audio.sender == "Prakriti"
-                        ? "text-right mr-2 italic text-green-500"
-                        : "ml-2 italic text-blue-500"
-                    }
-                  >
-                    {audio.sender}
-                  </p>
+          {messages?.map((message, index) => (
+            <div
+              key={index + message.sender}
+              className={
+                "flex flex-col " +
+                (message.sender === "prakriti" && "flex items-end")
+              }
+            >
+              {/* Sender */}
+              <div className="mt-4">
+                <p
+                  className={
+                    message.sender === "Prakriti"
+                      ? "text-right mr-2 italic text-green-500"
+                      : "ml-2 italic text-blue-500"
+                  }
+                >
+                  {message.sender}
+                </p>
 
-                  {/* Message */}
-                  <audio
-                    src={audio.blobUrl}
-                    className="appearance-none"
-                    controls
-                  />
-                </div>
+                {/* Message */}
+                {message.blobUrl ? (
+                  <audio src={message.blobUrl} className="appearance-none" controls />
+                ) : (
+                  <ChatBubble message={message.textMessage} sender={message.sender} />
+                )}
               </div>
-            );
-          })}
+            </div>
+          ))}
 
-          {messages.length == 0 && !isLoading && (
+          {messages.length === 0 && !isLoading && (
             <div className="text-center font-light italic mt-10">
               Send Prakriti a message...
             </div>
@@ -151,10 +131,26 @@ const Controller = () => {
             </div>
           )}
         </div>
-        
+
         {/* Recorder */}
-        <div className="fixed bottom-0 w-full py-6 border-t text-center bg-gradient-to-r from-green-900 to-green-500">
-          <div className="flex justify-end items-right w-full ">
+        <div className="fixed bottom-0 w-full py-6 border-t text-center bg-gradient-to-r from-lime-900 to-green-800">
+          <div className="flex justify-end items-center w-full">
+            <div className="flex-grow">
+              <input
+                type="text"
+                className="w-full border rounded p-2"
+                placeholder="Type your message..."
+                value={textMessage}
+                onChange={(e) => setTextMessage(e.target.value)}
+                onKeyPress={handleKeyPress} // Handle Enter key press
+              />
+            </div>
+            <button
+              className="p-2 bg-green-500 text-white rounded hover:bg-green-600 ml-2"
+              onClick={handleTextMessageSend}
+            >
+              Send
+            </button>
             <div>
               <RecordMessage handleStop={handleStop} />
             </div>
