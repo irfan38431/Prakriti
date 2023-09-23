@@ -6,8 +6,10 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
-import openai
+from pydantic import BaseModel
 
+import openai
+import logging 
 
 # Custom function imports
 from functions.text_to_speech import convert_text_to_speech
@@ -23,6 +25,15 @@ openai.api_key = config("OPEN_AI_KEY")
 # Initiate App
 app = FastAPI()
 
+class TextMessageRequest(BaseModel):
+    textMessage: str
+
+# Configure logging settings
+logging.basicConfig(
+    filename='app.log',  # Specify the log file location
+    level=logging.DEBUG,  # Set the log level (e.g., DEBUG, INFO, ERROR)
+    format='%(asctime)s [%(levelname)s] %(message)s',
+)
 
 # CORS - Origins
 origins = [
@@ -58,8 +69,7 @@ async def reset_conversation():
     return {"response": "conversation reset"}
 
 
-# Post bot response
-# Note: Not playing back in browser when using post request.
+# Post bot response for audio
 @app.post("/post-audio/")
 async def post_audio(file: UploadFile = File(...)):
 
@@ -104,3 +114,34 @@ async def post_audio(file: UploadFile = File(...)):
 
     # Use for Post: Return output audio
     return StreamingResponse(iterfile(), media_type="application/octet-stream")
+
+# Send text message and get chatbot response
+@app.post("/send-text-message")
+async def send_text_message(message: TextMessageRequest):
+    # Retrieve the text message from the request body
+    text_message = message.textMessage
+
+    # Log the incoming message
+    logging.info(f'Incoming message: {text_message}')
+
+    chat_response = get_chat_response(text_message)
+
+    # Log the chat response
+    if chat_response:
+        logging.info(f'Chatbot response: {chat_response}')
+        print("response milgaya")
+    else:
+        logging.error('Chatbot response not received')
+
+    # Store messages
+    store_messages(text_message, chat_response)
+
+    # Guard: Ensure output
+    if not chat_response:
+        logging.error('Failed chat response')
+        raise HTTPException(status_code=400, detail="Failed chat response")
+
+    reply_message = chat_response
+
+    # Return the chatbot's reply
+    return reply_message
