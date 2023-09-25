@@ -37,7 +37,7 @@ const Controller = () => {
 
         // send form data to api endpoint
         await axios
-          .post("http://0.0.0.0:6563/post-audio", formData, {
+          .post("https://prakriti-production.up.railway.app/post-audio", formData, {
             headers: {
               "Content-Type": "audio/mpeg",
             },
@@ -77,7 +77,7 @@ const Controller = () => {
 
     try {
       // Send the text message to the backend API
-      const response = await axios.post("http://0.0.0.0:6563/send-text-message", {
+      const response = await axios.post("https://prakriti-production.up.railway.app/send-text-message", {
         textMessage: textMessage,
       });
 
