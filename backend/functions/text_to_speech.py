@@ -24,6 +24,7 @@ def convert_text_to_speech(message):
 
   try:
     response = requests.post(endpoint, json=body, headers=headers)
+    print(response)
     print("response milgaya")
   except Exception as e:
      print("bhaiya not working")

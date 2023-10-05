@@ -1,5 +1,6 @@
-import { useState } from "react";
+import  { useState } from "react";
 import axios from "axios";
+import MenuIcon from "./Menu"; // Import the MenuIcon component
 
 type Props = {
   setMessages: any;
@@ -13,13 +14,13 @@ function Title({ setMessages }: Props) {
     setIsResetting(true);
 
     await axios
-      .get("https://prakriti-production.up.railway.app/reset", {
+      .get("http://localhost:8000/reset", {
         headers: {
           "Content-Type": "application/json",
         },
       })
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           setMessages([]);
         }
       })
@@ -29,30 +30,33 @@ function Title({ setMessages }: Props) {
   };
 
   return (
-    <div className="flex justify-center items-center w-full p-4 bg-lime-900 text-white font-bold shadow">
-      <div className="italic">Prakriti, Your AI Ayurvedic Companion</div>
-      <button
-        onClick={resetConversation}
-        className={
-          "transition-all duration-300 text-blue-300 hover:text-green-500 " +
-          (isResetting && "animate-pulse")
-        }
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-6"
+    <div className="flex justify-between items-center w-full p-4 bg-green-800 text-white font-bold shadow">
+      <div className="italic">Prakriti, Your AI Powered Mango Consultant</div>
+      <div className="flex items-center">
+        <button
+          onClick={resetConversation}
+          className={
+            "transition-all duration-300 text-blue-300 hover:text-pink-500 " +
+            (isResetting ? "animate-pulse" : "")
+          }
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-          />
-        </svg>
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6 mr-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+            />
+          </svg>
+        </button>
+        <MenuIcon classText="text-white hover:text-pink-500" />
+      </div>
     </div>
   );
 }

@@ -11,7 +11,7 @@ const Controller = () => {
 
   // Function to handle receiving a message from the chatbot
   const receiveMessage = (message: string) => {
-    const botMessage = { sender: "prakriti", textMessage: message };
+    const botMessage = { sender: "Prakriti", textMessage: message };
     setMessages((prevMessages) => [...prevMessages, botMessage]);
   };
 
@@ -37,7 +37,7 @@ const Controller = () => {
 
         // send form data to api endpoint
         await axios
-          .post("https://prakriti-production.up.railway.app/post-audio", formData, {
+          .post("http://localhost:8000/post-audio", formData, {
             headers: {
               "Content-Type": "audio/mpeg",
             },
@@ -49,7 +49,7 @@ const Controller = () => {
             audio.src = createBlobURL(blob);
 
             // Append to audio
-            const praMessage = { sender: "prakriti", blobUrl: audio.src };
+            const praMessage = { sender: "Prakriti", blobUrl: audio.src };
             setMessages((prevMessages) => [...prevMessages, praMessage]);
 
             // Play audio
@@ -77,19 +77,17 @@ const Controller = () => {
 
     try {
       // Send the text message to the backend API
-      const response = await axios.post("https://prakriti-production.up.railway.app/send-text-message", {
-        textMessage: textMessage,
-      });
+      const response = await axios.post(
+        "http://localhost:8000/send-text-message",
+        {
+          textMessage: textMessage,
+        }
+      );
 
-      // Handle the response from the backend if needed
-      // For example, you can update the UI based on the chatbot's reply.
-      const chatbotReply = response.data;
-
-      if (chatbotReply) {
+      // Handle the response from the backend
+      if (response.data && response.data.reply_message) {
         // Display the chatbot's reply in the frontend
-        receiveMessage(chatbotReply);
-
-        // You can add additional logic here to handle the chatbot's reply if needed
+        receiveMessage(response.data.reply_message);
       }
     } catch (error) {
       console.error(error);
@@ -119,7 +117,7 @@ const Controller = () => {
               key={index + message.sender}
               className={
                 "flex flex-col " +
-                (message.sender === "prakriti" && "flex items-end")
+                (message.sender === "Prakriti" && "flex items-end")
               }
             >
               {/* Sender */}
@@ -158,7 +156,7 @@ const Controller = () => {
         </div>
 
         {/* Recorder */}
-        <div className="fixed bottom-0 w-full py-6 border-t text-center bg-gradient-to-r from-lime-900 to-green-800">
+        <div className="fixed bottom-0 w-full py-6 border-t text-center bg-gradient-to-r from-green-900 to-green-600">
           <div className="flex justify-end items-center w-full">
             <div className="flex-grow">
               <input

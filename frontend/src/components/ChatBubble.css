@@ -17,7 +17,7 @@
   /* Default chat bubble for messages sent by others (you can adjust the styles as needed) */
   .chat-bubble.other {
     background-color: #08331b; /* Gray color */
-    color: black; /* Text color */
+    color: white; /* Text color */
     border-radius: 10px; /* Rounded corners */
     padding: 10px; /* Spacing inside the bubble */
     margin: 5px 0; /* Margin to separate bubbles */

@@ -115,6 +115,7 @@ async def post_audio(file: UploadFile = File(...)):
     # Use for Post: Return output audio
     return StreamingResponse(iterfile(), media_type="application/octet-stream")
 
+
 # Send text message and get chatbot response
 @app.post("/send-text-message")
 async def send_text_message(message: TextMessageRequest):
@@ -144,4 +145,4 @@ async def send_text_message(message: TextMessageRequest):
     reply_message = chat_response
 
     # Return the chatbot's reply
-    return reply_message
+    return {"reply_message": reply_message}  # Return JSON response
